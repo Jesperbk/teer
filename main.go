@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"os"
 )
 
@@ -12,6 +13,10 @@ func main() {
 	readFromAndWriteTo(stdInReader, stdOutWriter)
 }
 
-func readFromAndWriteTo(reader *bufio.Reader, writer *bufio.Writer) {
+func readFromAndWriteTo(reader io.Reader, writer io.Writer) {
+	inputReader := io.TeeReader(reader, writer)
+	lineScanner := bufio.NewScanner(inputReader)
 
+	for lineScanner.Scan() {
+	}
 }
