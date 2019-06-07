@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -13,52 +12,70 @@ import (
 
 func TestWriteToStdOut(t *testing.T) {
 	input := "Some string\nSome other string"
-	inputReader := strings.NewReader(input)
+	inputReader := readerOf(input)
 	var outputBuffer bytes.Buffer
 
-	testDir, err := ioutil.TempDir("", "teer_test")
-	testFilePath := path.Join(testDir, "test_file.log")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(testDir)
+	testFilePath, testDirPath := createTestFile(t)
+	defer os.RemoveAll(testDirPath)
 
 	readFromAndWriteTo(inputReader, &outputBuffer, testFilePath)
 
-	output, err := getOutput(&outputBuffer)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if input != output {
+	output := readAllFromReader(t, &outputBuffer)
+	if !matches(output, input) {
 		t.Fatalf("Unexpected output: '%s'\n", output)
 	}
 }
 
 func TestWriteToFile(t *testing.T) {
 	input := "Some string\nSome other string"
-	inputReader := strings.NewReader(input)
+	inputReader := readerOf(input)
 
-	testDir, err := ioutil.TempDir("", "teer_test")
-	testFilePath := path.Join(testDir, "test_file.log")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(testDir)
+	testFilePath, testDirPath := createTestFile(t)
+	defer os.RemoveAll(testDirPath)
 
 	readFromAndWriteTo(inputReader, ioutil.Discard, testFilePath)
 
-	outputBytes, err := ioutil.ReadFile(testFilePath)
-	output := string(outputBytes)
-	if input != output {
+	output := readAllFromFilePath(t, testFilePath)
+	if !matches(output, input) {
 		t.Fatalf("Unexpected output: '%s'\n", output)
 	}
 }
 
-func getOutput(reader io.Reader) (string, error) {
+func readerOf(str string) io.Reader {
+	return strings.NewReader(str)
+}
+
+func createTestFile(t *testing.T) (string, string) {
+	testDirPath, err := ioutil.TempDir("", "teer_test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testFilePath := path.Join(testDirPath, "test_file.log")
+
+	return testFilePath, testDirPath
+}
+
+func readAllFromReader(t *testing.T, reader io.Reader) string {
 	outputBytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return "", fmt.Errorf("Error while reading output: %v", err)
+		t.Fatalf("Error while reading output: %v", err)
 	}
 	output := string(outputBytes)
-	return output, nil
+	return output
+}
+
+func readAllFromFilePath(t *testing.T, path string) string {
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("Error while opening test file '%s': %v", path, err)
+	}
+	return readAllFromReader(t, file)
+}
+
+func matches(output string, input string) bool {
+	return input == stripTrailingNewLine(output)
+}
+
+func stripTrailingNewLine(str string) string {
+	return strings.TrimSuffix(str, "\n")
 }
