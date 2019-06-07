@@ -10,9 +10,8 @@ import (
 
 func main() {
 	stdInReader := bufio.NewReader(os.Stdin)
-	stdOutWriter := bufio.NewWriter(os.Stdout)
 
-	readFromAndWriteTo(stdInReader, stdOutWriter, "<<TODO>>")
+	readFromAndWriteTo(stdInReader, os.Stdout, os.Args[1])
 }
 
 func readFromAndWriteTo(reader io.Reader, writer io.Writer, outputFilePath string) {
