@@ -10,8 +10,10 @@ import (
 	"testing"
 )
 
+var input string
+
 func TestWriteToStdOut(t *testing.T) {
-	input := "Some string\nSome other string"
+	input = "Some string\nSome other string"
 	inputReader := readerOf(input)
 	var outputBuffer bytes.Buffer
 
@@ -20,14 +22,11 @@ func TestWriteToStdOut(t *testing.T) {
 
 	readFromAndWriteTo(inputReader, &outputBuffer, testFilePath)
 
-	output := readAllFromReader(t, &outputBuffer)
-	if !matches(output, input) {
-		t.Fatalf("Unexpected output: '%s'\n", output)
-	}
+	validateOutputFromReader(t, &outputBuffer)
 }
 
 func TestWriteToFile(t *testing.T) {
-	input := "Some string\nSome other string"
+	input = "Some string\nSome other string"
 	inputReader := readerOf(input)
 
 	testFilePath, testDirPath := createTestFile(t)
@@ -35,10 +34,7 @@ func TestWriteToFile(t *testing.T) {
 
 	readFromAndWriteTo(inputReader, ioutil.Discard, testFilePath)
 
-	output := readAllFromFilePath(t, testFilePath)
-	if !matches(output, input) {
-		t.Fatalf("Unexpected output: '%s'\n", output)
-	}
+	validateOutputFromFilePath(t, testFilePath)
 }
 
 func readerOf(str string) io.Reader {
@@ -55,25 +51,29 @@ func createTestFile(t *testing.T) (string, string) {
 	return testFilePath, testDirPath
 }
 
-func readAllFromReader(t *testing.T, reader io.Reader) string {
+func validateOutputFromReader(t *testing.T, reader io.Reader) {
 	outputBytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		t.Fatalf("Error while reading output: %v", err)
 	}
 	output := string(outputBytes)
-	return output
+
+	validateOutput(t, output)
 }
 
-func readAllFromFilePath(t *testing.T, path string) string {
+func validateOutputFromFilePath(t *testing.T, path string) {
 	file, err := os.Open(path)
 	if err != nil {
 		t.Fatalf("Error while opening test file '%s': %v", path, err)
 	}
-	return readAllFromReader(t, file)
+
+	validateOutputFromReader(t, file)
 }
 
-func matches(output string, input string) bool {
-	return input == stripTrailingNewLine(output)
+func validateOutput(t *testing.T, output string) {
+	if stripTrailingNewLine(output) != input {
+		t.Fatalf("Unexpected output: '%s'\n", output)
+	}
 }
 
 func stripTrailingNewLine(str string) string {
