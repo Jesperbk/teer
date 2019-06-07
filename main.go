@@ -20,14 +20,16 @@ func readFromAndWriteTo(reader io.Reader, writer io.Writer, outputFilePath strin
 	lineScanner := bufio.NewScanner(inputReader)
 
 	outputFile, err := os.Create(outputFilePath)
-	if err != nil {
-		log.Fatalf("Error while creating/accessing file '%s': %v\n", outputFilePath, err)
-	}
+	abortIfErr(err, "Error while creating/accessing file '%s': %v\n", outputFilePath, err)
 
 	for lineScanner.Scan() {
 		_, err := fmt.Fprintln(outputFile, lineScanner.Text())
-		if err != nil {
-			log.Fatalf("Error while writing to file '%s': %v\n", outputFilePath, err)
-		}
+		abortIfErr(err, "Error while writing to file '%s': %v\n", outputFilePath, err)
+	}
+}
+
+func abortIfErr(err error, message string, args ...interface{}) {
+	if err != nil {
+		log.Fatalf(message, args...)
 	}
 }
