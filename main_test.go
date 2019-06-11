@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -37,6 +38,18 @@ func TestWriteToFile(t *testing.T) {
 	validateOutputFromFilePath(t, testFilePath)
 }
 
+func TestOverwriteExistingFile(t *testing.T) {
+	input = "Some string\nSome other string"
+	inputReader := readerOf(input)
+
+	testFilePath, testDirPath := createTestFileWithContent(t, "Old content")
+	defer os.RemoveAll(testDirPath)
+
+	readFromAndWriteTo(inputReader, ioutil.Discard, testFilePath)
+
+	validateOutputFromFilePath(t, testFilePath)
+}
+
 func readerOf(str string) io.Reader {
 	return strings.NewReader(str)
 }
@@ -47,6 +60,20 @@ func createTestFile(t *testing.T) (string, string) {
 		t.Fatal(err)
 	}
 	testFilePath := path.Join(testDirPath, "test_file.log")
+
+	return testFilePath, testDirPath
+}
+
+func createTestFileWithContent(t *testing.T, content string) (string, string) {
+	testFilePath, testDirPath := createTestFile(t)
+
+	testFile, err := os.Create(testFilePath)
+	defer testFile.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Fprintln(testFile, content)
 
 	return testFilePath, testDirPath
 }
