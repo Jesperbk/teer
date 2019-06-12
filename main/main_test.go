@@ -25,7 +25,7 @@ func TestWriteToStdOut(t *testing.T) {
 		OutputPath:   testFilePath,
 		ExistsAction: options.ExistsActionTruncate,
 	}
-	readFromAndWriteTo(inputReader, ioutil.Discard, options)
+	readFromAndWriteTo(inputReader, &outputBuffer, options)
 
 	expected := input
 	validateOutputFromReader(t, expected, &outputBuffer)
