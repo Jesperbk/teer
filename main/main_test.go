@@ -22,8 +22,8 @@ func TestWriteToStdOut(t *testing.T) {
 	defer os.RemoveAll(testDirPath)
 
 	options := options.OutputOptions{
-		OutputPath:   testFilePath,
-		ExistsAction: options.ExistsActionTruncate,
+		OutputPath: testFilePath,
+		DoTruncate: true,
 	}
 	readFromAndWriteTo(inputReader, &outputBuffer, options)
 
@@ -39,8 +39,8 @@ func TestWriteToFile(t *testing.T) {
 	defer os.RemoveAll(testDirPath)
 
 	options := options.OutputOptions{
-		OutputPath:   testFilePath,
-		ExistsAction: options.ExistsActionTruncate,
+		OutputPath: testFilePath,
+		DoTruncate: true,
 	}
 	readFromAndWriteTo(inputReader, ioutil.Discard, options)
 
@@ -56,8 +56,8 @@ func TestCreateWhenFileNotExisting(t *testing.T) {
 	defer os.RemoveAll(testDirPath)
 
 	options := options.OutputOptions{
-		OutputPath:   testFilePath,
-		ExistsAction: options.ExistsActionAppend,
+		OutputPath: testFilePath,
+		DoTruncate: false,
 	}
 	readFromAndWriteTo(inputReader, ioutil.Discard, options)
 
@@ -73,8 +73,8 @@ func TestOverwriteExistingFile(t *testing.T) {
 	defer os.RemoveAll(testDirPath)
 
 	options := options.OutputOptions{
-		OutputPath:   testFilePath,
-		ExistsAction: options.ExistsActionTruncate,
+		OutputPath: testFilePath,
+		DoTruncate: true,
 	}
 	readFromAndWriteTo(inputReader, ioutil.Discard, options)
 
@@ -90,8 +90,8 @@ func TestAppendToExistingFile(t *testing.T) {
 	defer os.RemoveAll(testDirPath)
 
 	options := options.OutputOptions{
-		OutputPath:   testFilePath,
-		ExistsAction: options.ExistsActionAppend,
+		OutputPath: testFilePath,
+		DoTruncate: false,
 	}
 	readFromAndWriteTo(inputReader, ioutil.Discard, options)
 
